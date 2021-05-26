@@ -7,10 +7,10 @@ const Home = () => {
   const getData = async () => {
     try {
       const res = await fetch(
-        "https://sheet.best/api/sheets/bff990d0-8ada-43e9-97eb-0ad668bb19ec"
+        "https://sheet.best/api/sheets/bff990d0-8ada-43e9-97eb-0ad668bb19ec?_format=index"
       );
       const data = await res.json();
-      setData(data);
+      setData(Object.keys(data).map((key) => data[key]));
     } catch (error) {
       console.log(error);
     }
@@ -19,6 +19,23 @@ const Home = () => {
   useEffect(() => {
     getData();
   }, []);
+
+  const handleDelete = async (rowIndex) => {
+    try {
+      const res = await fetch(
+        `https://sheet.best/api/sheets/bff990d0-8ada-43e9-97eb-0ad668bb19ec/${rowIndex}`,
+        {
+          method: "DELETE",
+        }
+      );
+      if (res.ok) {
+        const updatedData = data.filter((_, i) => i !== rowIndex);
+        setData(updatedData);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
   return (
     <div className="accordion" id="accordionExample">
       {data?.map((item, i) => (
@@ -51,7 +68,12 @@ const Home = () => {
                   <Link to={`/edit/${i}`} style={{ textDecoration: "none" }}>
                     Edit
                   </Link>
-                  <button className="btn btn-sm btn-danger ms-1">X</button>
+                  <button
+                    className="btn btn-sm btn-danger ms-1"
+                    onClick={() => handleDelete(i)}
+                  >
+                    X
+                  </button>
                 </span>
               </div>
               <p>{item.message}</p>
